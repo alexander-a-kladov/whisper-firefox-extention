@@ -139,26 +139,24 @@
     else btn.innerHTML = iconMic();
   }
 
-  // ─── Send to whisper.cpp server ─────────────────────────────────────────────
+  // ─── Send to whisper.cpp via background script (avoids CORS on localhost) ───
   async function transcribeAndInsert(blob, inputEl, btn) {
     try {
-      const formData = new FormData();
-      // whisper.cpp server expects field named "file"
-      formData.append("file", blob, "recording.webm");
-      formData.append("response_format", "json");
+      // Decode WebM/Opus → PCM float32 → WAV in the content script,
+      // because AudioContext is not available in background scripts.
+      const wavBase64 = await blobToWavBase64(blob);
 
-      const res = await fetch(`${SERVER_URL}/inference`, {
-        method: "POST",
-        body: formData,
+      const response = await browser.runtime.sendMessage({
+        type: "transcribe",
+        base64: wavBase64,
+        mimeType: "audio/wav",
       });
 
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(`Server ${res.status}: ${text}`);
+      if (!response.ok) {
+        throw new Error(response.error || `Server error`);
       }
 
-      const data = await res.json();
-      const transcript = (data.text || "").trim();
+      const transcript = (response.text || "").trim();
 
       if (!transcript) {
         showToast("Nothing heard — try again.", "warning");
@@ -174,6 +172,86 @@
       activeButton = null;
       activeInput = null;
     }
+  }
+
+  // ─── WebM Blob → WAV base64 ──────────────────────────────────────────────────
+  // Decodes the recorded WebM/Opus blob using AudioContext (available in content
+  // scripts), then re-encodes as a 16-bit mono 16 kHz WAV — the format
+  // whisper.cpp expects.
+  async function blobToWavBase64(blob) {
+    const arrayBuffer = await blob.arrayBuffer();
+
+    // Decode compressed audio to raw PCM
+    const audioCtx = new AudioContext({ sampleRate: 16000 });
+    let audioBuffer;
+    try {
+      audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+    } finally {
+      audioCtx.close();
+    }
+
+    // Mix down to mono at 16 kHz (whisper works best with this)
+    const numChannels = audioBuffer.numberOfChannels;
+    const length = audioBuffer.length;
+    const pcm = new Float32Array(length);
+
+    for (let ch = 0; ch < numChannels; ch++) {
+      const channelData = audioBuffer.getChannelData(ch);
+      for (let i = 0; i < length; i++) {
+        pcm[i] += channelData[i] / numChannels;
+      }
+    }
+
+    // Encode as 16-bit PCM WAV
+    const wavBuffer = encodeWav(pcm, 16000);
+
+    // Convert ArrayBuffer → base64
+    const bytes = new Uint8Array(wavBuffer);
+    let binary = "";
+    for (let i = 0; i < bytes.length; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    return btoa(binary);
+  }
+
+  // ─── PCM float32 → WAV ArrayBuffer ──────────────────────────────────────────
+  function encodeWav(samples, sampleRate) {
+    const bitsPerSample = 16;
+    const numChannels = 1;
+    const byteRate = (sampleRate * numChannels * bitsPerSample) / 8;
+    const blockAlign = (numChannels * bitsPerSample) / 8;
+    const dataSize = samples.length * blockAlign;
+    const buffer = new ArrayBuffer(44 + dataSize);
+    const view = new DataView(buffer);
+
+    function writeStr(offset, str) {
+      for (let i = 0; i < str.length; i++)
+        view.setUint8(offset + i, str.charCodeAt(i));
+    }
+
+    writeStr(0, "RIFF");
+    view.setUint32(4, 36 + dataSize, true);
+    writeStr(8, "WAVE");
+    writeStr(12, "fmt ");
+    view.setUint32(16, 16, true);          // PCM chunk size
+    view.setUint16(20, 1, true);           // PCM format
+    view.setUint16(22, numChannels, true);
+    view.setUint32(24, sampleRate, true);
+    view.setUint32(28, byteRate, true);
+    view.setUint16(32, blockAlign, true);
+    view.setUint16(34, bitsPerSample, true);
+    writeStr(36, "data");
+    view.setUint32(40, dataSize, true);
+
+    // Convert float32 [-1, 1] → int16
+    let offset = 44;
+    for (let i = 0; i < samples.length; i++) {
+      const s = Math.max(-1, Math.min(1, samples[i]));
+      view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7fff, true);
+      offset += 2;
+    }
+
+    return buffer;
   }
 
   // ─── Insert text into various input types ───────────────────────────────────
