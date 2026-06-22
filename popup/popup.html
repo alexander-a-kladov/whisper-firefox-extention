@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Whisper Speech Input</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="9" y="2" width="6" height="12" rx="3"/>
+        <path d="M19 10a7 7 0 0 1-14 0"/>
+        <line x1="12" y1="19" x2="12" y2="22"/>
+        <line x1="8" y1="22" x2="16" y2="22"/>
+      </svg>
+      <span>Whisper Input</span>
+    </div>
+    <div id="status-dot" class="dot dot--checking" title="Checking server…"></div>
+  </header>
+
+  <main>
+    <div id="server-status" class="status-card">
+      <div class="status-label">whisper.cpp server</div>
+      <div id="status-text" class="status-value">Checking…</div>
+    </div>
+
+    <section class="section">
+      <label class="label" for="server-url">Server URL</label>
+      <div class="input-row">
+        <input id="server-url" type="url" value="http://localhost:8080" spellcheck="false" />
+        <button id="btn-save" class="btn btn--primary">Save</button>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="label">How to use</div>
+      <ol class="howto">
+        <li>Click the <strong>🎙 mic button</strong> that appears next to any text field.</li>
+        <li>Speak — the button pulses while recording.</li>
+        <li>Click the <strong>■ stop button</strong> (or press <kbd>Esc</kbd>) to transcribe.</li>
+        <li>Text is inserted at your cursor position.</li>
+      </ol>
+    </section>
+
+    <section class="section section--tip">
+      <div class="tip-label">whisper.cpp quick start</div>
+      <code>./server -m models/ggml-base.en.bin -p 4</code>
+    </section>
+  </main>
+
+  <script src="popup.js"></script>
+</body>
+</html>

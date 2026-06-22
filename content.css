@@ -1,0 +1,108 @@
+/* ── Whisper Speech Input — content.css ── */
+
+/* Wrapper for inline inputs */
+.wsp-wrapper {
+  display: inline-flex !important;
+  align-items: center !important;
+  position: relative !important;
+}
+
+/* Mic button (inline variant, inside .wsp-wrapper) */
+.wsp-mic-btn {
+  all: unset;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin-left: 4px;
+  border-radius: 50%;
+  background: #18181b;
+  color: #a1a1aa;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+  border: 1.5px solid #3f3f46;
+}
+
+.wsp-mic-btn svg {
+  width: 14px;
+  height: 14px;
+  pointer-events: none;
+  display: block;
+}
+
+.wsp-mic-btn:hover {
+  background: #27272a;
+  color: #e4e4e7;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.25);
+  border-color: #7c3aed;
+}
+
+/* Block variant — after textarea / contenteditable */
+.wsp-block-btn {
+  display: flex;
+  margin-top: 5px;
+  margin-left: 2px;
+}
+
+/* Recording state */
+.wsp-mic-btn[data-wsp-state="recording"] {
+  background: #7c3aed;
+  color: #fff;
+  border-color: #7c3aed;
+  animation: wsp-pulse 1.2s ease-in-out infinite;
+}
+
+/* Loading / transcribing state */
+.wsp-mic-btn[data-wsp-state="loading"] {
+  background: #1e1b4b;
+  color: #818cf8;
+  border-color: #4338ca;
+  cursor: wait;
+}
+
+@keyframes wsp-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.5); }
+  50%       { box-shadow: 0 0 0 6px rgba(124, 58, 237, 0); }
+}
+
+/* Spinning icon */
+.wsp-spin {
+  animation: wsp-rotate 0.8s linear infinite;
+}
+
+@keyframes wsp-rotate {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Toast ── */
+#wsp-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 2147483647;
+  max-width: 320px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.2s, transform 0.2s;
+  color: #fff;
+}
+
+#wsp-toast.wsp-toast--visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+#wsp-toast.wsp-toast--info    { background: #3730a3; }
+#wsp-toast.wsp-toast--success { background: #065f46; }
+#wsp-toast.wsp-toast--warning { background: #78350f; }
+#wsp-toast.wsp-toast--error   { background: #7f1d1d; }

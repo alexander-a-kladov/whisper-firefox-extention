@@ -1,0 +1,233 @@
+/* ── Whisper Speech Input — popup.css ── */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:       #0f0f12;
+  --surface:  #18181b;
+  --border:   #2d2d35;
+  --purple:   #7c3aed;
+  --purple-l: #a78bfa;
+  --green:    #4ade80;
+  --red:      #f87171;
+  --yellow:   #fbbf24;
+  --text:     #e4e4e7;
+  --muted:    #71717a;
+  --radius:   10px;
+  font-size: 13px;
+}
+
+body {
+  width: 300px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, sans-serif;
+  line-height: 1.5;
+}
+
+/* ── Header ── */
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: -0.01em;
+}
+
+.logo svg {
+  width: 18px;
+  height: 18px;
+  stroke: var(--purple-l);
+}
+
+/* Status dot */
+.dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.dot--checking { background: var(--yellow); animation: blink 1s ease-in-out infinite; }
+.dot--ok       { background: var(--green); }
+.dot--error    { background: var(--red); }
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}
+
+/* ── Main ── */
+main {
+  padding: 14px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Server status card */
+.status-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.status-label { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; }
+.status-value { font-weight: 600; font-size: 12px; }
+.status-value.ok     { color: var(--green); }
+.status-value.error  { color: var(--red); }
+
+/* ── Sections ── */
+.section { display: flex; flex-direction: column; gap: 6px; }
+
+.label {
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+.input-row {
+  display: flex;
+  gap: 6px;
+}
+
+input[type="url"] {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  font-size: 12px;
+  padding: 6px 10px;
+  outline: none;
+  font-family: monospace;
+  transition: border-color 0.15s;
+}
+
+input[type="url"]:focus {
+  border-color: var(--purple);
+}
+
+/* ── Buttons ── */
+.btn {
+  all: unset;
+  cursor: pointer;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 12px;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+
+.btn--primary {
+  background: var(--purple);
+  color: #fff;
+}
+
+.btn--primary:hover { background: #6d28d9; }
+
+/* ── How-to list ── */
+.howto {
+  list-style: none;
+  counter-reset: steps;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding-left: 0;
+}
+
+.howto li {
+  counter-increment: steps;
+  display: flex;
+  gap: 8px;
+  font-size: 12px;
+  color: #a1a1aa;
+}
+
+.howto li::before {
+  content: counter(steps);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--border);
+  color: var(--purple-l);
+  font-size: 10px;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.howto strong { color: var(--text); }
+kbd {
+  display: inline-block;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 0 4px;
+  font-size: 10px;
+  font-family: system-ui;
+}
+
+/* ── Tip section ── */
+.section--tip {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  gap: 6px;
+}
+
+.tip-label {
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+.section--tip code {
+  font-family: monospace;
+  font-size: 11px;
+  color: var(--purple-l);
+  word-break: break-all;
+}
+
+/* ── Saved flash ── */
+.flash {
+  position: fixed;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  background: #065f46;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 20px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.flash.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
